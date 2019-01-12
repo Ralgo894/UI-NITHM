@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>UI-NITHM</title>
+    <link rel="stylesheet" type="text/css" href="./css/reset.css" />
+    <style media="screen">
+      @import url('https://fonts.googleapis.com/css?family=Press+Start+2P');
+      body {
+        font-family: 'Press Start 2P', cursive;
+
+        background-image: url(./unyo.gif);
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+
+        overflow: hidden;
+      }
+
+      .fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .center {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #titleContainer {
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+      }
+      #titleContainer h1 {
+        font-size: 400%;
+      }
+      #titleContainer .but {
+        margin: 2% 0 0 0;
+      }
+
+      #tutorialOverlay {
+        z-index: -1;
+        background-color: rgba(0,0,0,.4);
+      }
+      #tutorial .container {
+        position: relative;
+        width: calc(200px + 12vw);
+        height: calc(200px + 12vw);
+        text-align: center;
+        background-color: #fff;
+        border: double 10px #aaa;
+      }
+      #tutorial .container h1 {
+        margin: 5%;
+      }
+      #tutorial .container h1 span {
+        font-size: 20px;
+      }
+      #tutorial .container .target {
+        position: absolute;
+        top: 32%;
+        left: 10%;
+        width: 18%;
+        height: 18%;
+
+        border: double 10px #EE4035;
+        border-radius: 50%;
+      }
+      @keyframes TuNoteMove {
+        0% {
+          left: 70%;
+          opacity: 1;
+        }
+        20% {
+          left: 70%;
+          opacity: 1;
+        }
+        50% {
+          left: 10%;
+          opacity: 1;
+        }
+        70% {
+          left: 10%;
+          opacity: 1;
+        }
+        90% {
+          left: 10%;
+          opacity: 0;
+        }
+        100% {
+          left: 10%;
+          opacity: 0;
+        }
+      }
+      #tutorial .container .notes {
+        position: absolute;
+        top: 32%;
+        left: 70%;
+        width: 18%;
+        height: 18%;
+        border: double 10px #EE4035;
+        border-radius: 50%;
+        animation-name: TuNoteMove;
+      }
+      #tutorial .container .notes.animation{
+        animation-duration: 2s;
+        opacity: 0;
+        left: 10%;
+      }
+
+      @keyframes bg-color {
+        0% { background-color: rgba(255,0,0,.5); }
+        10% { background-color: rgba(255,204,0,.5); }
+        20% { background-color: rgba(204,255,0,.5); }
+        30% { background-color: rgba(51,255,0,.5); }
+        40% { background-color: rgba(0,255,51,.5); }
+        50% { background-color: rgba(0,255,255,.5); }
+        60% { background-color: rgba(0,204,255,.5); }
+        70% { background-color: rgba(51,51,255,.5); }
+        80% { background-color: rgba(204,0,255,.5); }
+        90% { background-color: rgba(255,0,204,.5); }
+        100% { background-color: rgba(255,0,0,.5); }
+      }
+      #gameWrapper .gameBack {
+        animation: bg-color 10s infinite;
+        background-color: rgba(255,0,0,.5);
+      }
+
+      #gameWrapper .target {
+        cursor: pointer;
+      }
+
+      #gameWrapper .backBut {
+        position: absolute;
+        width: auto;
+        height: 10%;
+        margin: 10px;
+        cursor: pointer;
+      }
+
+      #combo {
+        -webkit-text-stroke: 1px #fff;
+        font-size: 300%;
+      }
+
+      #timingContainer div {
+        position: absolute;
+        -webkit-text-stroke: 1px #fff;
+      }
+      #timingContainer div span {
+        font-size: 200%;
+      }
+
+      #notesContainer ul {
+        width: 100%;
+        height: 100%;
+      }
+      #notesContainer div,
+      #notesContainer img {
+        position: absolute;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="titleWrapper" class="fixed" style="">
+      <div id="titleContainer" class="center">
+        <img src="./titleE.png" style="width: 40%; height: auto;">
+        <img src="./titleJ.png" style="width: 10%; height: auto;">
+        <img src="./startButton.png" class="but" style="width: 10%; height: auto; cursor: pointer">
+      </div>
+    </div>
+
+    <div id="gameWrapper" style="display:none;">
+      <div class="fixed" style="background-color: rgba(0,0,0,.5);"></div>
+      <div class="fixed gameBack"></div>
+
+      <div id="comboContainer" class="fixed center">
+        <span id="combo">0combo</span>
+      </div>
+      <div id="timingContainer"></div>
+      <div id="wall" class="fixed"></div>
+      <div id="notesContainer" class="fixed"><ul></ul></div>
+
+      <img class="backBut" src="./backButton.png">
+    </div>
+
+    <div id="tutorial" class="fixed center" style="display: none;">
+      <div id="tutorialOverlay" class="fixed"></div>
+      <div class="container">
+        <h1>
+          <span style="color:#FF0000">T</span>
+          <span style="color:#FFBF00">u</span>
+          <span style="color:#80FF00">t</span>
+          <span style="color:#00FF40">o</span>
+          <span style="color:#00FFFF">r</span>
+          <span style="color:#0040FF">i</span>
+          <span style="color:#8000FF">a</span>
+          <span style="color:#FF00BF">l</span>
+        </h1>
+        <h2>タイミングよくクリックしよう</h2>
+        <div class="target"></div>
+        <img class="notes" src="./0.png" style="display: none; border: double 10px #EE4035;"></img>
+        <img class="notes" src="./1.png" style="display: none; border: double 10px #56B949;"></img>
+        <img class="notes" src="./2.png" style="display: none; border: double 10px #F3A530;"></img>
+
+        <img src="./startButton.png" class="but" style="width: 60%; height: auto; cursor: pointer">
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+      var startTime;
+      var playing = false;
+
+      const colorList = [
+        '#EE4035',
+        '#56B949',
+        '#F3A530',
+        '#367ABD'
+      ]
+      const timingList = {
+        perfect:64,
+        great:180,
+        nice:240,
+        miss:320
+      };
+
+      var notesList = {};
+      var notesIndex = 0;
+
+      var combo = 0;
+      var maxCombo = 0;
+      var catchTimingList = {
+        perfect:0,
+        great:0,
+        nice:0,
+        miss:0
+      };
+
+      var bgm = new Audio('audio/らっぷ.wav');
+      bgm.load();
+      bgm.loop = true;
+
+      var seS = [
+        [
+          new Audio('audio/0/0.wav'),
+          new Audio('audio/0/1.wav'),
+          new Audio('audio/0/2.wav'),
+          new Audio('audio/0/3.wav'),
+          new Audio('audio/0/4.wav'),
+        ],
+        [
+          new Audio('audio/1/0.wav'),
+          new Audio('audio/1/1.wav'),
+          new Audio('audio/1/2.wav'),
+          new Audio('audio/1/3.wav'),
+          new Audio('audio/1/4.wav'),
+        ],
+        [
+          new Audio('audio/2/0.wav'),
+          new Audio('audio/2/1.wav'),
+          new Audio('audio/2/2.wav'),
+          new Audio('audio/2/3.wav'),
+          new Audio('audio/2/4.wav'),
+        ],
+      ];
+      // seS.forEach(e1 => {
+      //   e1.forEach(e2 =>{
+      //     e2.load();
+      //   });
+      // });
+
+      setInterval(() => {
+        if (playing) {
+          moveNotes();
+        }
+      }, 1000/60);
+
+      var element;
+      element = document.querySelector('#titleContainer .but');
+      element.addEventListener('click', () => {
+        new Audio('audio/殴る.wav').play();
+        enterGame();
+      }, false);
+
+      element = document.querySelector('#tutorial .but');
+      element.addEventListener('click', function() {
+        new Audio('audio/殴る.wav').play();
+
+        bgm.play();
+
+        var gameWrapper = document.getElementById('gameWrapper');
+        var tutorial = document.getElementById('tutorial');
+
+        tutorial.style.display = 'none';
+        gameWrapper.style.display = '';
+
+        playing = true;
+        spawnNotes();
+      }, false);
+
+      element = document.querySelector('#gameWrapper .backBut');
+      element.addEventListener('click', () => {
+        new Audio('audio/殴る.wav').play();
+
+        bgm.pause();
+        bgm.currentTime = 0;
+
+        endGame();
+      }, false);
+
+
+      function enterGame() {
+        var dateObj = new Date();
+        startTime = dateObj.getTime();
+
+        var titleWrapper = document.getElementById('titleWrapper');
+        var gameWrapper = document.getElementById('gameWrapper');
+
+        titleWrapper.style.display = 'none';
+
+        showTutorial();
+      }
+
+      function endGame() {
+        var gameWrapper = document.getElementById('gameWrapper');
+        var titleWrapper = document.getElementById('titleWrapper');
+
+        gameWrapper.style.display = 'none';
+        resetGame();
+
+        titleWrapper.style.display = '';
+
+        setTimeout(function () {
+          var resultText =
+          'リザルト\n\n' +
+          `Perfect: ${catchTimingList.perfect}\n` +
+          `Great  : ${catchTimingList.great}\n` +
+          `Nice    : ${catchTimingList.nice}\n` +
+          `Miss    : ${catchTimingList.miss}\n\n` +
+          'Max Combo : ' + maxCombo;
+          alert(resultText);
+        }, 10);
+      }
+
+      function showTutorial() {
+        var gameWrapper = document.getElementById('gameWrapper');
+        var tutorial = document.getElementById('tutorial');
+        tutorial.style.display = '';
+
+        var target = document.querySelector('#tutorial .container .target');
+        var notes = document.querySelectorAll('#tutorial .container .notes');
+
+        notes[0].style.display = '';
+        notes[0].classList.add('animation');
+        setTimeout(function () {
+          notes[0].style.display = 'none';
+          notes[0].classList.remove('animation');
+
+          target.style.border = `double 10px ${colorList[1]}`;
+
+          notes[1].style.display = '';
+          notes[1].classList.add('animation');
+          setTimeout(function () {
+            notes[1].style.display = 'none';
+            notes[1].classList.remove('animation');
+
+            target.style.border = `double 10px ${colorList[2]}`;
+
+            notes[2].style.display = '';
+            notes[2].classList.add('animation');
+          }, 2000);
+        }, 2000);
+
+        setTimeout(function () {
+          // tutorial.style.display = 'none';
+          // gameWrapper.style.display = '';
+          //
+          // playing = true;
+          // spawnNotes();
+        }, 6000);
+      }
+
+      function spawnNotes() {
+        if (!playing) return;
+
+        var time = getTime();
+
+        var ul = document.querySelector('#notesContainer ul');
+        var ulW = ul.clientWidth;
+        var ulH = ul.clientHeight;
+        var targetSize = Math.floor((ulW + ulH) / 2 * 0.1);
+
+        var xMode = getRandomInt(2);
+        var yMode = getRandomInt(2);
+        var xTarget = Math.floor((xMode * 35 + getRandomInt(45)) / 100 * ulW);
+        var yTarget = Math.floor((yMode * 35 + getRandomInt(45)) / 100 * ulH);
+        var xStart = xMode == 0 ? ulW : -1 * targetSize;
+        var yStart = yMode == 0 ? ulH : -1 * targetSize;
+        var imageType = getRandomInt(3);
+        var color = colorList[notesIndex % 4];
+
+        var notesData = {
+          "xs":xStart,
+          "ys":yStart,
+          "xt":xTarget,
+          "yt":yTarget,
+          "xm":xMode,
+          "ym":yMode,
+          "imageType":imageType,
+          "color":color,
+          "time":time + 2500,
+          "spead":(4 + getRandomInt(3)) / 10000
+        };
+
+        notesList[notesIndex] = notesData;
+
+        var target = document.createElement('li');
+        target.setAttribute('data-i', notesIndex);
+        target.setAttribute('onClick', "checkTiming(this.getAttribute('data-i'));");
+
+        target.innerHTML =
+        `<img src="./${imageType}.png" width="${targetSize}" style="top:${yStart}px; left:${xStart}px; border: double 10px ${color};">` +
+        `<div class="target" style="width:${targetSize}px; height:${targetSize}px; top:${yTarget}px; left:${xTarget}px; border: double 10px ${color};"></div>`;
+
+        ul.insertBefore(target, ul.firstChild);
+
+        notesIndex++;
+
+        var nextSpawnTime = 1500 - (Math.floor(notesIndex / 10) * 200);
+
+        if (nextSpawnTime <= 300) nextSpawnTime = 300;
+
+        if (playing) {
+          setTimeout(function () {
+            spawnNotes();
+          }, nextSpawnTime);
+        }
+      }
+
+      function moveNotes() {
+        var time = getTime();
+
+        var ul = document.querySelector('#notesContainer ul');
+        var ulW = ul.clientWidth;
+        var ulH = ul.clientHeight;
+
+        var notes = document.querySelectorAll('#notesContainer li img');
+
+        for (var i = 0; i < notes.length; i++) {
+          var notesIndex = notes[i].parentNode.getAttribute('data-i');
+          // 終点の位置 + 終点から始点への方向 * ((判定ラインにくる時間 – 曲の再生時間) * レーンの長さ * スピード)
+          var x = notesList[notesIndex]['xt'] + (notesList[notesIndex]['xm'] == 0 ? 1 : -1) * ((notesList[notesIndex]['time'] - time) * Math.abs(notesList[notesIndex]['xs'] - notesList[notesIndex]['xt']) * notesList[notesIndex]['spead']);
+          var y = notesList[notesIndex]['yt'] + (notesList[notesIndex]['ym'] == 0 ? 1 : -1) * ((notesList[notesIndex]['time'] - time) * Math.abs(notesList[notesIndex]['ys'] - notesList[notesIndex]['yt']) * notesList[notesIndex]['spead']);
+          var color = notesList[notesIndex]['color'];
+
+          // var rotationTime = notes[i].getAttribute('data-rotationTime')
+          notes[i].setAttribute('style', `top:${y}px; left:${x}px; border: double 10px ${color};`);
+
+          if (notesList[notesIndex]['time'] < time - timingList['miss']) {
+            checkTiming(notesIndex);
+          }
+        }
+      }
+
+      function checkTiming(notesNum) {
+        var time = getTime();
+        var timing = Math.abs(notesList[notesNum]['time'] - time);
+        var timingText;
+
+        if (timing <= timingList['perfect']) {
+          catchTimingList['perfect']++;
+          combo++;
+          timingText =
+            // 'Promerfect'
+            '<span style="color:#FF0000;">P</span>' +
+            '<span style="color:#FF9900;">r</span>' +
+            '<span style="color:#CCFF00;">o</span>' +
+            '<span style="color:#33FF00;">m</span>' +
+            '<span style="color:#00FF66;">e</span>' +
+            '<span style="color:#00FFFF;">r</span>' +
+            '<span style="color:#0066FF;">f</span>' +
+            '<span style="color:#3300FF;">e</span>' +
+            '<span style="color:#CC00FF;">c</span>' +
+            '<span style="color:#FF0099;">t</span>';
+        }
+        else if (timing <= timingList['great']) {
+          catchTimingList['great']++;
+          combo++;
+          timingText = '<span style="color:#FF0000;">Great</span>';
+        }
+        else if (timing <= timingList['nice']) {
+          catchTimingList['nice']++;
+          combo = 0;
+          timingText = '<span style="color:#FFF700;">Nice</span>';
+        }
+        else {
+          catchTimingList['miss']++;
+          combo = 0;
+          timingText = '<span style="color:#6144b8;">Miss</span>';
+        }
+
+        comboWrite();
+        timingWrite(timingText, notesNum);
+        removeNotesList(notesNum);
+        playSE(notesList[notesNum].imageType);
+      }
+
+      function playSE(imageType) {
+        seS[imageType][getRandomInt(5)].play();
+      }
+
+      function comboWrite() {
+        var comboElement = document.getElementById('combo');
+        comboElement.textContent = combo + 'combo';
+
+        if (combo > maxCombo) maxCombo = combo;
+      }
+
+      function timingWrite(timingText, notesNum) {
+        var ul = document.querySelector('#notesContainer ul');
+        var ulW = ul.clientWidth;
+        var ulH = ul.clientHeight;
+        var targetSize = Math.floor((ulW + ulH) / 2 * 0.1 / 2);
+
+        var timingContainer = document.getElementById('timingContainer');
+        var timing = document.createElement('div');
+        timing.innerHTML = timingText;
+        timing.setAttribute('style', `top:${notesList[notesNum]['yt'] + targetSize}px; left:${notesList[notesNum]['xt']}px;`);
+        timingContainer.appendChild(timing);
+
+        setTimeout(function () {
+          timingContainer.removeChild(timing);
+        }, 1000);
+      }
+
+      function removeNotesList(notesNum) {
+        var removeLi = document.querySelector(`#notesContainer li[data-i="${notesNum}"]`);
+        removeLi.parentNode.removeChild(removeLi);
+      }
+
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+      }
+
+      function getTime() {
+        var dateObj = new Date();
+        var nowTime = dateObj.getTime();
+        var time = nowTime - startTime;
+        return time;
+      }
+
+      function resetGame() {
+        startTime;
+        playing = false;
+        notesList = {};
+        notesIndex = 0;
+        combo = 0;
+
+        var element = document.getElementById('combo');
+        element.textContent = '0combo';
+
+        element = document.querySelector('#notesContainer ul');
+        element.innerHTML = '';
+
+        var notes = document.querySelectorAll('#tutorial .container .notes');
+        for (var i = 0; i < notes.length; i++) {
+          notes[i].style.display = 'none';
+        }
+      }
+    </script>
+  </body>
+</html>
